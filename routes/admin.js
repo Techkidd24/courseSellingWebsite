@@ -93,13 +93,46 @@ adminRouter.post('/course',adminMiddleware, async function(req, res){
     }
 })
 
-adminRouter.put('/course',function(req,res){
+adminRouter.put('/course',adminMiddleware, async function(req,res){
+    const adminId=req.adminId;
+
+    const { title, description, price, imageUrl, courseId}=req.body;
+
+    const checkCourse=await courseModel.findOne({
+        _id: courseId,
+        creatorID: adminId
+    })
+    if(!checkCourse){
+        res.json({
+            message:"course does not exists"
+        })
+    }else{
+        const course= await courseModel.updateOne({
+            _id: courseId,
+            creatorID: adminId
+        },{
+            title: title,
+            description: description,
+            price: price,
+            imageUrl: imageUrl
+        })
+        res.json({
+            message: "course updated",
+            courseId: course._id
+        })  
+    }
+    
 
 })
 
-adminRouter.get('/course/bulk',function(req, res){
+adminRouter.get('/course/bulk',adminMiddleware,async function(req, res){
+    const adminId=req.adminId;
+
+    const courses=await courseModel.find({
+        creatorID: adminId
+    })
     res.json({
-        message: "purchase endpoint"
+        courses: courses
     })
 })
 
